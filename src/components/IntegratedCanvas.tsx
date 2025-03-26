@@ -675,21 +675,9 @@ export default function IntegratedCanvas({ activeTool }: IntegratedCanvasProps) 
             const reader = new FileReader();
             reader.onload = (f) => {
               const data = f.target?.result as string;
-              
-              fabric.Image.fromURL(data, (img: fabric.Image) => {
-                img.scale(0.5);
-                fabricCanvas.add(img);
-                fabricCanvas.centerObject(img);
-                fabricCanvas.setActiveObject(img);
-                fabricCanvas.renderAll();
-              }, {
-                crossOrigin: 'anonymous'
-              });
-            };
-            reader.readAsDataURL(file);
+            }
           }
-        };
-        break;
+        }
         
       case 'eraser':
         // Eraser tool: remove objects that intersect with eraser

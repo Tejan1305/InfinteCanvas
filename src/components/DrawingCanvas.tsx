@@ -51,10 +51,14 @@ export default function DrawingCanvas({ activeTool }: DrawingCanvasProps) {
                 e.preventDefault();
                 if (fabricCanvas.historyRedo && fabricCanvas.historyRedo.length > 0) {
                   const nextState = fabricCanvas.historyRedo.pop();
-                  fabricCanvas.loadFromJSON(nextState, () => {
-                    fabricCanvas.historyUndo.push(nextState!);
-                    fabricCanvas.renderAll();
-                  });
+                  
+                  // Add a null check to prevent passing undefined to loadFromJSON
+                  if (nextState) {
+                    fabricCanvas.loadFromJSON(nextState, () => {
+                      fabricCanvas.historyUndo.push(nextState);
+                      fabricCanvas.renderAll();
+                    });
+                  }
                 }
                 break;
             }
@@ -279,16 +283,19 @@ export default function DrawingCanvas({ activeTool }: DrawingCanvasProps) {
             reader.onload = (f) => {
               const data = f.target?.result as string;
               
-              // Fix image loading with correct callback pattern
-              fabric.Image.fromURL(data, (img: fabric.Image) => {
-                img.scale(0.5);
-                canvas.add(img);
-                canvas.centerObject(img);
-                canvas.setActiveObject(img);
+              // Create an Image element and then use fabric.Image.fromElement
+              const imgElement = new Image();
+              imgElement.src = data;
+              imgElement.onload = () => {
+                const fabricImg = new fabric.Image(imgElement, {
+                  crossOrigin: 'anonymous'
+                });
+                fabricImg.scale(0.5);
+                canvas.add(fabricImg);
+                canvas.centerObject(fabricImg);
+                canvas.setActiveObject(fabricImg);
                 canvas.renderAll();
-              }, {
-                crossOrigin: 'anonymous'
-              });
+              };
             };
             reader.readAsDataURL(file);
           }
