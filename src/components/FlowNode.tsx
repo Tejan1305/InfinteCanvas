@@ -1,64 +1,77 @@
-'use client';
-
-import { useState, useEffect } from 'react';
+import { memo, useState } from 'react';
 import { Handle, Position } from 'reactflow';
 
 interface FlowNodeProps {
   data: {
     label: string;
   };
-  selected: boolean;
+  isConnectable: boolean;
 }
 
-export default function FlowNode({ data, selected }: FlowNodeProps) {
+function FlowNode({ data, isConnectable }: FlowNodeProps) {
   const [label, setLabel] = useState(data.label);
   const [isEditing, setIsEditing] = useState(false);
 
-  // Update the local state when props change
-  useEffect(() => {
-    setLabel(data.label);
-  }, [data.label]);
-
-  const handleDoubleClick = () => {
-    setIsEditing(true);
-  };
-
-  const handleBlur = () => {
-    setIsEditing(false);
-    // Here you would update the node data in the parent component
-    // via callbacks or context if needed
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      setIsEditing(false);
-    }
-  };
-
   return (
-    <div
-      className={`p-2 rounded border-2 ${
-        selected ? 'border-blue-500' : 'border-gray-300'
-      } bg-white shadow-md w-36 h-auto text-center`}
-      onDoubleClick={handleDoubleClick}
-    >
-      <Handle type="target" position={Position.Top} />
-      
-      {isEditing ? (
-        <input
-          type="text"
-          value={label}
-          onChange={(e) => setLabel(e.target.value)}
-          onBlur={handleBlur}
-          onKeyDown={handleKeyDown}
-          className="w-full text-center bg-blue-50 outline-none"
-          autoFocus
-        />
-      ) : (
-        <div>{label}</div>
-      )}
-      
-      <Handle type="source" position={Position.Bottom} />
+    <div className="relative p-0.5">
+      <div className="px-2 py-1 shadow-md rounded-md bg-blue-50 border-2 border-blue-500">
+        <div className="flex items-center">
+          <div className="rounded-full w-6 h-6 flex justify-center items-center bg-blue-100 mr-1">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-blue-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+          </div>
+          <div 
+            className="min-w-[70px] text-center"
+            onClick={() => !isEditing && setIsEditing(true)}
+          >
+            {isEditing ? (
+              <input
+                type="text"
+                value={label}
+                onChange={(e) => setLabel(e.target.value)}
+                onBlur={() => setIsEditing(false)}
+                className="w-full text-xs font-medium text-gray-700 border border-blue-200 p-0.5 rounded"
+                autoFocus
+                onFocus={(e) => e.target.select()}
+              />
+            ) : (
+              <div className="text-xs font-medium text-gray-700">
+                {label}
+                <span className="text-[9px] text-gray-400 ml-1 opacity-50 block">(Edit)</span>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Handles on all four sides for maximum connection flexibility */}
+      <Handle
+        type="target"
+        position={Position.Top}
+        isConnectable={isConnectable}
+        className="w-1.5 h-1.5 bg-blue-500"
+      />
+      <Handle
+        type="source"
+        position={Position.Bottom}
+        isConnectable={isConnectable}
+        className="w-1.5 h-1.5 bg-blue-500"
+      />
+      <Handle
+        type="source"
+        position={Position.Right}
+        isConnectable={isConnectable}
+        className="w-1.5 h-1.5 bg-blue-500"
+      />
+      <Handle
+        type="target"
+        position={Position.Left}
+        isConnectable={isConnectable}
+        className="w-1.5 h-1.5 bg-blue-500"
+      />
     </div>
   );
 }
+
+export default memo(FlowNode);
